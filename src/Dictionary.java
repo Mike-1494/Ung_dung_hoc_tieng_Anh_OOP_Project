@@ -1,7 +1,10 @@
 import java.util.ArrayList;
 import java.util.Collections;
-class Dictionary {
-    private ArrayList<Word> words;
+import java.util.Comparator;
+import java.util.List;
+
+public class Dictionary {
+    private final ArrayList<Word> words;
 
     public Dictionary() {
         this.words = new ArrayList<>();
@@ -12,7 +15,12 @@ class Dictionary {
     }
 
     public void sortWords() {
-        Collections.sort(words, (w1, w2) -> w1.getWord_target().compareToIgnoreCase(w2.getWord_target()));
+        this.words.sort(new Comparator<Word>() {
+            @Override
+            public int compare(Word word1, Word word2) {
+                return word1.getWord_target().compareToIgnoreCase(word2.getWord_target());
+            }
+        });
     }
 
     public ArrayList<Word> getWords() {
