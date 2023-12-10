@@ -6,6 +6,10 @@ import java.util.List;
 public class Dictionary {
     private final ArrayList<Word> words;
 
+    public ArrayList<Word> getWordList() {
+        return words;
+    }
+
     public Dictionary() {
         this.words = new ArrayList<>();
     }
@@ -22,8 +26,18 @@ public class Dictionary {
             }
         });
     }
-
-    public ArrayList<Word> getWords() {
-        return words;
+    public void removeWord(Word word) {
+        words.remove(word);
+        this.sortWords();
     }
+
+    public void updateWordExplain(Word word, String newExplain) {
+        word.setWord_explain(newExplain);
+    }
+
+    public void updateWordTarget(Word word, String newTarget) {
+        word.setWord_target(newTarget);
+        this.sortWords();
+    }
+
 }

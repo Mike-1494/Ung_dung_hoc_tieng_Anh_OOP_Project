@@ -56,7 +56,7 @@ public class DictionaryManagement {
     }
 
     public Word dictionaryLookup(String word_target) {
-        for (Word word : this.dictionary.getWords()) {
+        for (Word word : this.dictionary.getWordList()) {
             if (word.getWord_target().equals(word_target)) {
                 return word;
             }
@@ -83,15 +83,14 @@ public class DictionaryManagement {
 
     public void removeWord(String word_target) {
         Word wordToRemove = null;
-        for (Word word : this.dictionary.getWords()) {
+        for (Word word : this.dictionary.getWordList()) {
             if (word.getWord_target().equals(word_target)) {
                 wordToRemove = word;
                 break;
             }
         }
-
         if (wordToRemove != null) {
-            this.dictionary.getWords().remove(wordToRemove);
+            this.dictionary.removeWord(wordToRemove);
 
             try {
                 Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root", "140904");
@@ -104,39 +103,66 @@ public class DictionaryManagement {
                 e.printStackTrace();
             }
         }
+
     }
 
     public void updateWord(String word_target, String new_word_explain) {
-        for (Word word : this.dictionary.getWords()) {
-            if (word.getWord_target().equals(word_target)) {
-                word.setWord_explain(new_word_explain);
+        Word res = dictionaryLookup(word_target);
+        dictionary.updateWordExplain(res, new_word_explain);
 
-                try {
-                    Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root", "140904");
-                    PreparedStatement statement = connection.prepareStatement("UPDATE words SET word_explain = ? WHERE word_target = ?");
-                    statement.setString(1, new_word_explain);
-                    statement.setString(2, word_target);
-                    statement.executeUpdate();
-                    statement.close();
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-
-                break;
-            }
+        try {
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root", "140904");
+            PreparedStatement statement = connection.prepareStatement("UPDATE words SET word_explain = ? WHERE word_target = ?");
+            statement.setString(1, new_word_explain);
+            statement.setString(2, word_target);
+            statement.executeUpdate();
+            statement.close();
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
-    public List<Word> dictionarySearcher(String prefix) {
-        List<Word> result = new ArrayList<>();
-        for (Word word : this.dictionary.getWords()) {
-            if (word.getWord_target().startsWith(prefix)) {
-                result.add(word);
+    public static int binarySearchFirstEqual(ArrayList<Word> res, String target) {
+        int low = 0;
+        int high = res.size() - 1;
+        int result = -1;
+        int len = target.length();
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            String cur = res.get(mid).getWord_target();
+
+            // Check if the current word's substring matches the target
+            if (cur.length() >= len && cur.substring(0, len).equals(target)) {
+                result = mid;
+                high = mid - 1;  // Look for the first occurrence to the left
+            } else if (cur.compareTo(target) < 0) {
+                low = mid + 1;
+            } else {
+                high = mid - 1;
             }
         }
 
         return result;
+    }
+
+    /**
+     * search word in dictionary.
+     * @param target target to search
+     * @return list of word
+     */
+    public ArrayList<Word> dictionarySearcher(String target) {
+        ArrayList<Word> res = new ArrayList<Word>();
+        int start = binarySearchFirstEqual(dictionary.getWordList(), target);
+        if (start == -1) return res;
+
+        while (start < dictionary.getWordList().size() &&
+                dictionary.getWordList().get(start).getWord_target().startsWith(target)) {
+            res.add(dictionary.getWordList().get(start));
+            start++;
+        }
+        return res;
     }
 
 }
