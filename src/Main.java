@@ -11,6 +11,7 @@ public class Main {
         DictionaryManagement dmng = new DictionaryManagement(dictionary);
         DictionaryCommandline dcml = new DictionaryCommandline(dmng);
         dcml.showAllWords();
-
+        String res = dmng.getPhonetics("hi");
+        System.out.println(res);
     }
 }

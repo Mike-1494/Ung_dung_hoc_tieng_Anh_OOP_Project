@@ -3,6 +3,15 @@ import java.util.Collections;
 import java.util.Scanner;
 import java.util.*;
 import java.sql.*;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 
 public class DictionaryManagement {
     private final Dictionary dictionary;
@@ -165,4 +174,31 @@ public class DictionaryManagement {
         return res;
     }
 
+
+    private String parse(String responseBody) {
+        JSONParser parser = new JSONParser();
+        try {
+            JSONArray jsonArray = (JSONArray) parser.parse(responseBody);
+            JSONObject jsonObject = (JSONObject) jsonArray.get(0);
+            JSONArray phonetics = (JSONArray) jsonObject.get("phonetics");
+            JSONObject phonetic = (JSONObject) phonetics.get(0);
+            return (String) phonetic.get("audio");
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    public String getPhonetics(String word) {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.dictionaryapi.dev/api/v2/entries/en/" + word))
+                .build();
+
+        String responseBody = client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::body)
+                .join();
+
+        return parse(responseBody);
+    }
 }
