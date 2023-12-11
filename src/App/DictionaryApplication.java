@@ -7,12 +7,36 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class DictionaryApplication extends Application {
+    private String answer;
+
+    public void setAnswer(String answer) {
+        this.answer = answer;
+    }
+
+    public String getAnswer() {
+        return answer;
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("DictionaryApplication.fxml"));
-        Scene MenuScene = new Scene(root);
-        primaryStage.setScene(MenuScene);
+        DataStore dataStore = DataStore.getInstance();
+        dataStore.Init();
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("DictionaryApplication.fxml"));
+        Parent root = loader.load();
+        DictionaryController controller = loader.getController();
+        Scene scene = new Scene(root);
+
+        scene.setOnKeyPressed(event -> {
+            try {
+                controller.handleKeyboardInput(event);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        primaryStage.setScene(scene);
         primaryStage.show();
+        return;
     }
 
     public static void runApplication() {
