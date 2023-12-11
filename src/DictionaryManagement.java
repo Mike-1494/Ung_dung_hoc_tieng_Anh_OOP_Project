@@ -7,6 +7,10 @@ import java.sql.*;
 public class DictionaryManagement {
     private final Dictionary dictionary;
 
+    public DictionaryManagement() {
+        this.dictionary = new Dictionary();
+    }
+
     public DictionaryManagement(Dictionary dictionary) {
         this.dictionary = dictionary;
     }
@@ -36,7 +40,8 @@ public class DictionaryManagement {
 
     public void insertFromDatabase() {
         try {
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root", "140904");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root",
+                    "140904");
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM words");
 
@@ -69,8 +74,10 @@ public class DictionaryManagement {
         this.dictionary.addWord(word);
 
         try {
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root", "140904");
-            PreparedStatement statement = connection.prepareStatement("INSERT INTO words (word_target, word_explain) VALUES (?, ?)");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root",
+                    "140904");
+            PreparedStatement statement = connection
+                    .prepareStatement("INSERT INTO words (word_target, word_explain) VALUES (?, ?)");
             statement.setString(1, word.getWord_target());
             statement.setString(2, word.getWord_explain());
             statement.executeUpdate();
@@ -94,7 +101,8 @@ public class DictionaryManagement {
             this.dictionary.getWords().remove(wordToRemove);
 
             try {
-                Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root", "140904");
+                Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root",
+                        "140904");
                 PreparedStatement statement = connection.prepareStatement("DELETE FROM words WHERE word_target = ?");
                 statement.setString(1, word_target);
                 statement.executeUpdate();
@@ -112,8 +120,10 @@ public class DictionaryManagement {
                 word.setWord_explain(new_word_explain);
 
                 try {
-                    Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root", "140904");
-                    PreparedStatement statement = connection.prepareStatement("UPDATE words SET word_explain = ? WHERE word_target = ?");
+                    Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary",
+                            "root", "140904");
+                    PreparedStatement statement = connection
+                            .prepareStatement("UPDATE words SET word_explain = ? WHERE word_target = ?");
                     statement.setString(1, new_word_explain);
                     statement.setString(2, word_target);
                     statement.executeUpdate();
