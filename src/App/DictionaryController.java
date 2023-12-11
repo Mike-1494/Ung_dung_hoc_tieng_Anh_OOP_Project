@@ -37,23 +37,26 @@ public class DictionaryController {
     public void getWordInfo() {
         try {
             String word = getRandomWord();
-            URL url = new URL("https://wordsapiv1.p.mashape.com/words/" + word);
+            URL url = new URL("https://api.dictionaryapi.dev/api/v2/entries/en/" + word);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
+
             int status = con.getResponseCode();
+            System.out.println(status);
             if (status == 200) {
-                // BufferedReader in = new BufferedReader(
-                // new java.io.InputStreamReader(con.getInputStream()));
-                // String inputLine;
-                // StringBuffer content = new StringBuffer();
-                // while ((inputLine = in.readLine()) != null) {
-                // content.append(inputLine);
-                // System.out.println(inputLine);
-                // }
-                // in.close();
-                // con.disconnect();
-                // System.out.println("Response: " + content.toString());
-                // print status code
+                BufferedReader in = new BufferedReader(
+                        new java.io.InputStreamReader(con.getInputStream()));
+                String inputLine;
+                StringBuffer content = new StringBuffer();
+                while ((inputLine = in.readLine()) != null) {
+                    content.append(inputLine);
+                    System.out.println(inputLine);
+                }
+                in.close();
+                con.disconnect();
+                System.out.println("Response: " + content.toString());
+                // parse JSON
+                
                 mainLabel.setText(String.valueOf(status));
             } else {
                 System.out.println("Error");
@@ -61,7 +64,8 @@ public class DictionaryController {
         } catch (MalformedURLException e) {
             System.out.println("Malformed URL");
         } catch (IOException e) {
-            System.out.println("IOException");
+            // mainLabel.setText(e.getMessage());
+            System.out.println(e);
         }
     }
 
