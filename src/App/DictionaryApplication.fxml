@@ -2,6 +2,8 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -11,6 +13,12 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1370.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="App.DictionaryController">
    <children>
+      <TableView layoutX="376.0" layoutY="163.0" prefHeight="471.0" prefWidth="536.0">
+        <columns>
+          <TableColumn prefWidth="75.0" text="Words" />
+          <TableColumn prefWidth="460.0000305175781" text="Meaning in Vietnamese" />
+        </columns>
+      </TableView>
       <Line endX="275.0" layoutX="25.0" layoutY="200.0" />
       <Line endY="610.0" layoutX="960.0" startY="110.0" />
       <Label layoutX="1096.0" layoutY="80.0" text="Your stats">
@@ -52,5 +60,6 @@
       </GridPane>
       <Button fx:id="submitBtn" layoutX="613.0" layoutY="611.0" mnemonicParsing="false" onAction="#submitAnswer" text="Submit" visible="false" />
       <Label fx:id="messageLabel" layoutX="626.0" layoutY="567.0" text="Label" visible="false" />
+      <Label layoutX="123.0" layoutY="334.0" scaleX="2.0" scaleY="2.0" scaleZ="2.0" text="Search Words" />
    </children>
 </AnchorPane>

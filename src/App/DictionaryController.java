@@ -11,6 +11,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
+import javafx.scene.control.TableView;
 import javafx.stage.Stage;
 
 public class DictionaryController {
@@ -33,6 +34,8 @@ public class DictionaryController {
     private Label messagLabel;
     @FXML
     private Button submitButton;
+    @FXML
+    private TableView<String> myTable;
 
     private final int wordLength = 5;
     private final int numRow = 6;
