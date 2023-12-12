@@ -30,6 +30,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -82,16 +83,21 @@ public class DictionaryController {
 
     @FXML
     public void initialize() {
-        taskList = FXCollections.observableArrayList(
-            new Task(0, "setup", "done")
-        );
+        taskList = FXCollections.observableArrayList();
         priority.setCellValueFactory(new PropertyValueFactory<Task, Integer>("priority"));
         taskName.setCellValueFactory(new PropertyValueFactory<Task, String>("taskName"));
-        taskProgress.setCellValueFactory(new PropertyValueFactory<Task, String>("taskProgress"));
+        taskProgress.setCellValueFactory(new PropertyValueFactory<>("taskProgress"));
+        taskProgress.setCellFactory(TextFieldTableCell.forTableColumn()); // Enable editing
+        taskProgress.setOnEditCommit(event -> {
+            Task task = event.getTableView().getItems().get(event.getTablePosition().getRow());
+            task.setTaskProgress(event.getNewValue());
+            updateTasktoMySQL(task);
+        });
+        //todolist.getColumns().add(taskProgress);
         
         //todolist.getColumns().addAll(priority, taskName, taskProgress);
     
-        
+        todolist.setEditable(true);
         todolist.setItems(taskList);
         loadTasksFromMySQL();
         loadNotesFromFile();
@@ -354,6 +360,26 @@ public class DictionaryController {
                 insertStmt.setInt(1, task.getPriority());
                 insertStmt.setString(2, task.getTaskName());
                 insertStmt.setString(3, task.getTaskProgress());
+                insertStmt.executeUpdate();
+            }
+    
+            System.out.println("Task saved to MySQL successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error saving task to MySQL: " + e.getMessage());
+        }
+    }
+    
+    private void updateTasktoMySQL(Task task) {
+        String url = "jdbc:mysql://localhost:3306/dictionary";
+        String username = "root";
+        String password = "140904";
+    
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            String insertQuery = "UPDATE Tasklist SET progress = ? WHERE task_name = ?";
+            try (PreparedStatement insertStmt = conn.prepareStatement(insertQuery)) {
+                insertStmt.setString(1, task.getTaskProgress());
+                insertStmt.setString(2, task.getTaskName());
+
                 insertStmt.executeUpdate();
             }
     

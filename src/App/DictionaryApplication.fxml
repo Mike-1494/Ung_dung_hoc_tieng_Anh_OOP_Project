@@ -81,7 +81,7 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <TableView fx:id="todolist" layoutX="1.0" layoutY="1.0" onSort="#switchtoNotes" prefHeight="468.0" prefWidth="575.0">
+                        <TableView fx:id="todolist" layoutX="1.0" layoutY="1.0" onSort="#switchtoTasklist" prefHeight="468.0" prefWidth="575.0">
                           <columns>
                             <TableColumn fx:id="priority" prefWidth="82.39993286132812" text="Priority" />
                             <TableColumn fx:id="taskName" minWidth="0.0" prefWidth="353.333251953125" text="Tasks" />
