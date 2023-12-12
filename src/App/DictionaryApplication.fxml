@@ -17,14 +17,8 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1370.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="App.DictionaryController">
    <children>
-      <Line endX="275.0" layoutX="25.0" layoutY="200.0" />
-      <Line endY="610.0" layoutX="1020.0" layoutY="22.0" startY="110.0" />
-      <Label layoutX="1096.0" layoutY="80.0" text="Your stats">
-         <font>
-            <Font size="24.0" />
-         </font>
-      </Label>
-      <Label layoutX="1047.0" layoutY="151.0" text="Number of Quizzes done:" textAlignment="CENTER">
+      <Line endY="610.0" layoutX="1007.0" layoutY="18.0" startY="110.0" />
+      <Label layoutX="38.0" layoutY="129.0" prefHeight="52.0" prefWidth="128.0" text="Search words" textAlignment="CENTER">
          <font>
             <Font size="18.0" />
          </font>
@@ -34,10 +28,9 @@
             <Font size="28.0" />
          </font>
       </Label>
-      <Line endY="610.0" layoutX="320.0" startY="110.0" />
-      <Line endX="275.0" layoutX="25.0" layoutY="300.0" />
-      <Button layoutX="95.0" layoutY="130.0" mnemonicParsing="false" onAction="#switchToGameMultipleChoice" text="Multiple-choice&#10;Quizzes" textAlignment="CENTER" />
-      <Button layoutX="117.0" layoutY="241.0" mnemonicParsing="false" onAction="#switchToGameWordle" text="Wordle" textAlignment="CENTER" />
+      <Line endY="610.0" layoutX="349.0" layoutY="21.0" startY="110.0" />
+      <Button layoutX="1093.0" layoutY="136.0" mnemonicParsing="false" onAction="#switchToGameMultipleChoice" text="Multiple-choice&#10;Quizzes" textAlignment="CENTER" />
+      <Button layoutX="1115.0" layoutY="240.0" mnemonicParsing="false" onAction="#switchToGameWordle" text="Wordle" textAlignment="CENTER" />
       <Button layoutX="25.0" layoutY="14.0" mnemonicParsing="false" onAction="#returnToMenu" text="Menu" textAlignment="CENTER" />
       <GridPane fx:id="wordleGrid" layoutX="490.0" layoutY="130.0" prefHeight="400.0" prefWidth="300.0">
         <columnConstraints>
@@ -74,20 +67,35 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
       </GridPane>
-      <Button layoutX="112.0" layoutY="354.0" mnemonicParsing="false" onAction="#switchtoNotes" prefHeight="42.0" prefWidth="66.0" text="Notes" />
+      <Button layoutX="1113.0" layoutY="338.0" mnemonicParsing="false" onAction="#switchtoNotes" prefHeight="42.0" prefWidth="66.0" text="Notes" />
       <TabPane fx:id="tab" layoutX="386.0" layoutY="158.0" prefHeight="534.0" prefWidth="574.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>
+            <Tab text="Dictionary">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <TableView layoutX="-2.0" prefHeight="508.0" prefWidth="578.0">
+                          <columns>
+                            <TableColumn prefWidth="75.0" text="Word" />
+                            <TableColumn prefWidth="99.46676635742188" text="Pronunciation" />
+                              <TableColumn prefWidth="402.9332275390625" text="Meaning in Vietnamese" />
+                          </columns>
+                        </TableView>
+                     </children></AnchorPane>
+              </content>
+            </Tab>
           <Tab text="To-do list">
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <TableView fx:id="todolist" layoutX="1.0" layoutY="1.0" onSort="#switchtoTasklist" prefHeight="468.0" prefWidth="575.0">
+                        <TableView fx:id="todolist" layoutX="1.0" layoutY="1.0" onSort="#switchtoTasklist" prefHeight="438.0" prefWidth="573.0">
                           <columns>
                             <TableColumn fx:id="priority" prefWidth="82.39993286132812" text="Priority" />
                             <TableColumn fx:id="taskName" minWidth="0.0" prefWidth="353.333251953125" text="Tasks" />
                               <TableColumn fx:id="taskProgress" minWidth="0.0" prefWidth="138.666748046875" text="Progress" />
                           </columns>
                         </TableView>
+                        <Button layoutX="1.0" layoutY="443.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="572.0" text="Delete Finished Task " />
                         <TextField layoutX="1.0" layoutY="472.0" prefHeight="26.0" prefWidth="57.0" />
                         <TextField layoutX="69.0" layoutY="473.0" prefHeight="26.0" prefWidth="361.0" />
                         <TextField layoutX="439.0" layoutY="473.0" prefHeight="26.0" prefWidth="67.0" />
@@ -108,5 +116,7 @@
           </Tab>
         </tabs>
       </TabPane>
+      <TextField layoutX="19.0" layoutY="181.0" prefHeight="39.0" prefWidth="246.0" />
+      <Button layoutX="273.0" layoutY="188.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="59.0" text="Search" />
    </children>
 </AnchorPane>
