@@ -1,4 +1,5 @@
 package App;
+import Base.*;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -75,14 +76,40 @@ public class DictionaryController {
     private TableColumn<Task, String> taskName; 
     @FXML 
     private TableColumn<Task, String> taskProgress;
+    @FXML
+    private TableView<Word> wordlist;
+    @FXML
+    private TableColumn<Word, String> word_tg;
+    @FXML
+    private TableColumn<Word, String> mean; 
 
     private ObservableList<Task> taskList;
+    private ObservableList<Word> WordList;
+
+    @FXML
+    private TextField searchbar;
+    @FXML
+    private Button searchbutton;
+    @FXML
+    private Label word;
+    @FXML 
+    private Label phonetics;
+    @FXML 
+    private Label meaning;
+    @FXML
+    private Button saveword;
+
+    private DictionaryAPI dictionaryAPI = new DictionaryAPI();
+
 
     private final int wordLength = 5;
     private final int numRow = 6;
 
     @FXML
     public void initialize() {
+        searchbutton.setOnAction(e -> searchWord());
+        saveword.setOnAction(e -> saveWord());
+
         taskList = FXCollections.observableArrayList();
         priority.setCellValueFactory(new PropertyValueFactory<Task, Integer>("priority"));
         taskName.setCellValueFactory(new PropertyValueFactory<Task, String>("taskName"));
@@ -92,20 +119,31 @@ public class DictionaryController {
             Task task = event.getTableView().getItems().get(event.getTablePosition().getRow());
             task.setTaskProgress(event.getNewValue());
             updateTasktoMySQL(task);
+        });    
+
+        WordList = FXCollections.observableArrayList();
+        word_tg.setCellValueFactory(new PropertyValueFactory<Word, String>("word_target"));
+        mean.setCellValueFactory(new PropertyValueFactory<Word, String>("word_explain"));
+        mean.setCellFactory(TextFieldTableCell.forTableColumn()); // Enable editing
+        mean.setOnEditCommit(event -> {
+            Word word = event.getTableView().getItems().get(event.getTablePosition().getRow());
+            word.setWord_explain(event.getNewValue());
+            updateWordtoMySQL(word);
         });
-        //todolist.getColumns().add(taskProgress);
-        
-        //todolist.getColumns().addAll(priority, taskName, taskProgress);
-    
+
+        wordlist.setItems(WordList);
+        wordlist.setEditable(true);
         todolist.setEditable(true);
         todolist.setItems(taskList);
         loadTasksFromMySQL();
         loadNotesFromFile();
+        loadWordsFromMySQL();
     }
 
 
     public void returnToMenu(ActionEvent event) throws Exception {
         resetScene(event);
+        tab.setVisible(true);
         mainLabel.setText("How are you today?\nLet's start learning!");
     }
 
@@ -128,6 +166,11 @@ public class DictionaryController {
         submitBtn.setText("Submit");
         submitBtn.setOnAction(null);
         submitBtn.setVisible(false);
+
+        wordlist.getItems().clear();
+        loadWordsFromMySQL();
+        todolist.getItems().clear();
+        loadTasksFromMySQL();
     }
     /**
      * Wordle
@@ -349,7 +392,7 @@ public class DictionaryController {
         tab.setVisible(true);
     }
 
-    private void saveTaskToMySQL(Task task) {
+    private void insertTaskToMySQL(Task task) {
         String url = "jdbc:mysql://localhost:3306/dictionary";
         String username = "root";
         String password = "140904";
@@ -393,7 +436,7 @@ public class DictionaryController {
     public void addTask() {
         Task newTask = new Task(1, "New Task", "In Progress");
         taskList.add(newTask);
-        saveTaskToMySQL(newTask);
+        insertTaskToMySQL(newTask);
     }
 
     private void loadTasksFromMySQL() {
@@ -450,6 +493,97 @@ public class DictionaryController {
             } catch (IOException e) {
                 System.out.println("Error loading notes from file: " + e.getMessage());
             }
+        }
+    }
+
+    private void searchWord() {
+        String input = searchbar.getText().trim();
+        if (!input.isEmpty()) {
+            Word word = dictionaryAPI.getWordDetails(input);
+            if (word != null) {
+                this.word.setText(word.getWord_target());
+                phonetics.setText(word.getPhonetics());
+                meaning.setText(word.getWord_explain());
+                meaning.setWrapText(true);
+            } else {
+                this.word.setText("Word not found");
+                this.word.setWrapText(true);
+                phonetics.setText("");
+                meaning.setText("");
+            }
+        }
+    }
+
+    private void saveWord() {
+        String word = this.word.getText();
+        String phonetics = this.phonetics.getText();
+        String meaning = this.meaning.getText();
+        String url = "jdbc:mysql://localhost:3306/dictionary";
+        String username = "root";
+        String password = "140904";
+    
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            String insertQuery = "INSERT IGNORE INTO Words (phonetics, word_target, word_explain) VALUES (?, ?, ?)";
+            try (PreparedStatement insertStmt = conn.prepareStatement(insertQuery)) {
+                insertStmt.setString(1, phonetics);
+                insertStmt.setString(2, word);
+                insertStmt.setString(3, meaning);
+                insertStmt.executeUpdate();
+            }
+    
+            System.out.println("Word saved to MySQL successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error saving word to MySQL: " + e.getMessage());
+        }
+        
+        System.out.println("Word saved: " + word);
+        System.out.println("Phonetics: " + phonetics);
+        System.out.println("Meaning: " + meaning);
+    }
+
+    private void loadWordsFromMySQL() {
+        String url = "jdbc:mysql://localhost:3306/dictionary";
+        String username = "root";
+        String password = "140904";
+
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            String selectQuery = "SELECT phonetics, word_target, word_explain FROM Words";
+            try (PreparedStatement selectStmt = conn.prepareStatement(selectQuery);
+                ResultSet resultSet = selectStmt.executeQuery()) {  
+                while (resultSet.next()) {
+                    String phonetics = resultSet.getString("phonetics");
+                    String word_target = resultSet.getString("word_target");
+                    String word_explain = resultSet.getString("word_explain");
+
+                    Word word = new Word(word_target, word_explain);
+                    word.setPhonetics(phonetics);
+                    WordList.add(word);
+                }
+            }
+
+            System.out.println("Words loaded from MySQL successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error loading words from MySQL: " + e.getMessage());
+        }
+    }
+
+    private void updateWordtoMySQL(Word word) {
+        String url = "jdbc:mysql://localhost:3306/dictionary";
+        String username = "root";
+        String password = "140904";
+    
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            String insertQuery = "UPDATE Words SET word_explain = ? WHERE word_target = ?";
+            try (PreparedStatement insertStmt = conn.prepareStatement(insertQuery)) {
+                insertStmt.setString(1, word.getWord_explain());
+                insertStmt.setString(2, word.getWord_target());
+
+                insertStmt.executeUpdate();
+            }
+    
+            System.out.println("Word saved to MySQL successfully.");
+        } catch (SQLException e) {
+            System.out.println("Word saving task to MySQL: " + e.getMessage());
         }
     }
 }

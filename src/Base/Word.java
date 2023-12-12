@@ -1,7 +1,8 @@
+package Base;
 public class Word {
     private String word_target;
     private String word_explain;
-
+    private String phonetics;
 
     public Word() {
     }
@@ -29,5 +30,13 @@ public class Word {
 
     public void setWord_explain(String word_explain) {
         this.word_explain = word_explain;
+    }
+
+    public void setPhonetics(String phonetics) {
+        this.phonetics = phonetics;
+    }
+    
+    public String getPhonetics(){
+        return this.phonetics;
     }
 }
