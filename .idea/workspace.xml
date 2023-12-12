@@ -5,7 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="164d1e73-1545-411c-ab90-9b4722a0c05d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/App/Task.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App/DictionaryApplication.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/App/DictionaryApplication.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,8 +51,8 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "D:/Learn JAVA/UngdunghoctiengAnh",
+    "git-widget-placeholder": "Tung",
+    "last_opened_file_path": "D:/OOPProj/Ung_dung_hoc_tieng_Anh_OOP_Project",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -100,6 +102,7 @@
       <workItem from="1701170406933" duration="108000" />
       <workItem from="1701170533206" duration="17000" />
       <workItem from="1701170602665" duration="4079000" />
+      <workItem from="1702346790947" duration="44000" />
     </task>
     <servers />
   </component>

@@ -7,6 +7,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -80,13 +81,17 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <TableView fx:id="todolist" layoutX="1.0" layoutY="1.0" prefHeight="505.0" prefWidth="575.0">
+                        <TableView fx:id="todolist" layoutX="1.0" layoutY="1.0" onSort="#switchtoNotes" prefHeight="468.0" prefWidth="575.0">
                           <columns>
-                            <TableColumn prefWidth="82.39993286132812" text="Id" />
-                            <TableColumn minWidth="0.0" prefWidth="353.333251953125" text="Tasks" />
-                              <TableColumn minWidth="0.0" prefWidth="138.666748046875" text="Progress" />
+                            <TableColumn fx:id="priority" prefWidth="82.39993286132812" text="Priority" />
+                            <TableColumn fx:id="taskName" minWidth="0.0" prefWidth="353.333251953125" text="Tasks" />
+                              <TableColumn fx:id="taskProgress" minWidth="0.0" prefWidth="138.666748046875" text="Progress" />
                           </columns>
                         </TableView>
+                        <TextField layoutX="1.0" layoutY="472.0" prefHeight="26.0" prefWidth="57.0" />
+                        <TextField layoutX="69.0" layoutY="473.0" prefHeight="26.0" prefWidth="361.0" />
+                        <TextField layoutX="439.0" layoutY="473.0" prefHeight="26.0" prefWidth="67.0" />
+                        <Button layoutX="517.0" layoutY="473.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="50.0" text="Add" />
                      </children>
                   </AnchorPane>
             </content>

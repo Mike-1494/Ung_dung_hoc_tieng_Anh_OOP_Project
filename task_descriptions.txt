@@ -1,2 +1,2 @@
-#1
-Hoc 10 tu vung
+hi, this is Tung's notes
+#1 Finished OOP Project

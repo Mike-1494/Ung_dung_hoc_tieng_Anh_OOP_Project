@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -16,7 +18,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
@@ -25,6 +29,13 @@ import javafx.stage.Stage;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class DictionaryController {
     @FXML
@@ -56,13 +67,38 @@ public class DictionaryController {
     @FXML
     private TextArea note;
     @FXML
-    private TableView<?> todolist;
+    private TableView<Task> todolist;
+    @FXML
+    private TableColumn<Task, Integer> priority;
+    @FXML
+    private TableColumn<Task, String> taskName; 
+    @FXML 
+    private TableColumn<Task, String> taskProgress;
+
+    private ObservableList<Task> taskList;
 
     private final int wordLength = 5;
     private final int numRow = 6;
 
-    public void returnToMenu(ActionEvent event) throws Exception {
+    @FXML
+    public void initialize() {
+        taskList = FXCollections.observableArrayList(
+            new Task(0, "setup", "done")
+        );
+        priority.setCellValueFactory(new PropertyValueFactory<Task, Integer>("priority"));
+        taskName.setCellValueFactory(new PropertyValueFactory<Task, String>("taskName"));
+        taskProgress.setCellValueFactory(new PropertyValueFactory<Task, String>("taskProgress"));
+        
+        //todolist.getColumns().addAll(priority, taskName, taskProgress);
+    
+        
+        todolist.setItems(taskList);
+        loadTasksFromMySQL();
         loadNotesFromFile();
+    }
+
+
+    public void returnToMenu(ActionEvent event) throws Exception {
         resetScene(event);
         mainLabel.setText("How are you today?\nLet's start learning!");
     }
@@ -81,7 +117,6 @@ public class DictionaryController {
         messageLabel.setVisible(false);
         questionLabel.setVisible(false);
         tab.setVisible(false);
-        todolist.setVisible(false);
         multipleChoiceGrid.setVisible(false);
         multipleChoiceGrid.getChildren().clear();
         submitBtn.setText("Submit");
@@ -299,6 +334,64 @@ public class DictionaryController {
         tab.setVisible(true);
         if(savenote.isPressed()){
             saveNote();
+        }
+    }
+
+    public void switchtoTasklist(ActionEvent event) throws Exception {
+        resetScene(event);
+        mainLabel.setText("Notes");
+        tab.setVisible(true);
+    }
+
+    private void saveTaskToMySQL(Task task) {
+        String url = "jdbc:mysql://localhost:3306/dictionary";
+        String username = "root";
+        String password = "140904";
+    
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            String insertQuery = "INSERT INTO Tasklist (priority, task_name, progress) VALUES (?, ?, ?)";
+            try (PreparedStatement insertStmt = conn.prepareStatement(insertQuery)) {
+                insertStmt.setInt(1, task.getPriority());
+                insertStmt.setString(2, task.getTaskName());
+                insertStmt.setString(3, task.getTaskProgress());
+                insertStmt.executeUpdate();
+            }
+    
+            System.out.println("Task saved to MySQL successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error saving task to MySQL: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    public void addTask() {
+        Task newTask = new Task(1, "New Task", "In Progress");
+        taskList.add(newTask);
+        saveTaskToMySQL(newTask);
+    }
+
+    private void loadTasksFromMySQL() {
+        String url = "jdbc:mysql://localhost:3306/dictionary";
+        String username = "root";
+        String password = "140904";
+
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            String selectQuery = "SELECT priority, task_name, progress FROM Tasklist";
+            try (PreparedStatement selectStmt = conn.prepareStatement(selectQuery);
+                ResultSet resultSet = selectStmt.executeQuery()) {  
+                while (resultSet.next()) {
+                    int priority = resultSet.getInt("priority");
+                    String taskName = resultSet.getString("task_name");
+                    String taskProgress = resultSet.getString("progress");
+
+                    Task task = new Task(priority, taskName, taskProgress);
+                    taskList.add(task);
+                }
+            }
+
+            System.out.println("Tasks loaded from MySQL successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error loading tasks from MySQL: " + e.getMessage());
         }
     }
 
