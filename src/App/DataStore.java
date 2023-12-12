@@ -7,6 +7,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -16,11 +18,13 @@ import com.google.gson.JsonParser;
 public class DataStore {
     private static DataStore instance = new DataStore();
     public WordInfo wordInfo;
-    public int currentColumn;
+    public volatile int currentColumn;
     public int currentRow;
     public List<String> words = new ArrayList<String>();
     public String answer;
     public int state;
+    public int numberOfWordleDone = 0;
+    public int numberOfMultipleChoiceDone = 0;
 
     private DataStore() {
 
@@ -65,64 +69,172 @@ public class DataStore {
             }
             return example;
         }
-    }
 
-    public static WordInfo getWordInfo(String word) {
-        try {
-            URL url = new URL("https://api.dictionaryapi.dev/api/v2/entries/en/" + word);
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-
-            int status = con.getResponseCode();
-            if (status == 200) {
-                BufferedReader in = new BufferedReader(
-                        new java.io.InputStreamReader(con.getInputStream()));
-                String inputLine;
-                StringBuffer content = new StringBuffer();
-                while ((inputLine = in.readLine()) != null) {
-                    content.append(inputLine);
-                }
-                in.close();
-                con.disconnect();
-                JsonArray json = JsonParser.parseString(content.toString()).getAsJsonArray();
-                JsonObject jsonObject = json.get(0).getAsJsonObject();
-                WordInfo newWordInfo = new Gson().fromJson(jsonObject, WordInfo.class);
-                if (newWordInfo.getExample().equals("Failed to get example")) {
-                    return null;
-                }
-                return newWordInfo;
-            } else {
-                System.out.println("Failed to get word info " + word);
-                return null;
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-            return null;
+        public static WordInfo defaultWordInfo() {
+            WordInfo wordInfo = instance.new WordInfo();
+            wordInfo.word = "hello";
+            wordInfo.meanings = new ArrayList<Meaning>();
+            Meaning meaning = wordInfo.new Meaning();
+            meaning.partOfSpeech = "noun";
+            meaning.definitions = new ArrayList<Meaning.Definition>();
+            Meaning.Definition definition = meaning.new Definition();
+            definition.definition = "used as a greeting or to begin a telephone conversation.";
+            definition.example = "Hello? How may I help you?";
+            definition.synonyms = new ArrayList<String>();
+            definition.asyonyms = new ArrayList<String>();
+            meaning.definitions.add(definition);
+            wordInfo.meanings.add(meaning);
+            return wordInfo;
         }
     }
 
-    public static WordInfo getWordInfo() {
+    private WordInfo getWordInfo(String word) {
+        wordInfo = null;
         try {
-            int getWordTryCount = 0;
-            while (getWordTryCount < 5) {
-                String word = getRandomWord();
-                if (getWordTryCount == 5)
-                    word = "hello";
-                WordInfo neWordInfo = getWordInfo(word);
-                if (neWordInfo != null) {
-                    return neWordInfo;
-                } else {
-                    getWordTryCount++;
-                    continue;
+            Runnable r = new Runnable() {
+                public void run() {
+                    if (wordInfo != null) {
+                        return;
+                    }
+                    try {
+                        URL url = new URL("https://api.dictionaryapi.dev/api/v2/entries/en/" + word);
+                        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                        con.setRequestMethod("GET");
+
+                        int status = con.getResponseCode();
+                        if (status == 200) {
+                            BufferedReader in = new BufferedReader(
+                                    new java.io.InputStreamReader(con.getInputStream()));
+                            String inputLine;
+                            StringBuffer content = new StringBuffer();
+                            while ((inputLine = in.readLine()) != null) {
+                                content.append(inputLine);
+                            }
+                            in.close();
+                            con.disconnect();
+                            JsonArray json = JsonParser.parseString(content.toString()).getAsJsonArray();
+                            JsonObject jsonObject = json.get(0).getAsJsonObject();
+                            WordInfo newWordInfo = new Gson().fromJson(jsonObject, WordInfo.class);
+                            if (newWordInfo.getExample().equals("Failed to get example")) {
+                                return;
+                            }
+
+                            wordInfo = newWordInfo;
+                            return;
+                        } else {
+                            return;
+                        }
+                    } catch (Exception e) {
+                        System.out.println(e);
+                        return;
+                    }
                 }
+            };
+            ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(3);
+            for (int i = 0; i < 3; i++)
+                executor.submit(r);
+
+            shutdownAndAwaitTermination(executor);
+
+            if (wordInfo != null) {
+                return wordInfo;
+            }
+            return WordInfo.defaultWordInfo();
+        } catch (Exception e) {
+            System.out.println(e);
+            return WordInfo.defaultWordInfo();
+        }
+    }
+
+    void shutdownAndAwaitTermination(ExecutorService executorService) {
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException ie) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public WordInfo getWordInfo() {
+        wordInfo = null;
+        try {
+            ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(20);
+            Runnable r = new Runnable() {
+                public void run() {
+                    if (wordInfo != null) {
+                        return;
+                    }
+                    try {
+                        String word = getRandomWord();
+                        WordInfo newWordInfo = getWordInfo(word);
+                        if (newWordInfo.getExample().equals("Failed to get example")) {
+                            return;
+                        }
+                        if (newWordInfo.word == "hello") {
+                            return;
+                        }
+                        wordInfo = newWordInfo;
+                    } catch (Exception e) {
+                        System.out.println(e);
+                        return;
+                    }
+                }
+            };
+            for (int i = 0; i < 20; i++)
+                executor.submit(r);
+            shutdownAndAwaitTermination(executor);
+
+            if (wordInfo != null) {
+                return wordInfo;
             }
         } catch (Exception e) {
             System.out.println(e);
         }
-        return null;
+        return WordInfo.defaultWordInfo();
     }
 
-    public static String getRandomWord() {
+    public WordInfo getWordInfo(int wordLength) {
+        wordInfo = null;
+        try {
+            ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(10);
+            Runnable r = new Runnable() {
+                public void run() {
+                    if (wordInfo != null) {
+                        return;
+                    }
+                    try {
+                        String word = getRandomWord(wordLength);
+                        WordInfo newWordInfo = getWordInfo(word);
+                        if (newWordInfo.getExample().equals("Failed to get example")) {
+                            return;
+                        }
+                        if (newWordInfo.word == "hello") {
+                            return;
+                        }
+                        wordInfo = newWordInfo;
+                    } catch (Exception e) {
+                        System.out.println(e);
+                        return;
+                    }
+                }
+            };
+            for (int i = 0; i < 10; i++)
+                executor.submit(r);
+            shutdownAndAwaitTermination(executor);
+
+            if (wordInfo != null) {
+                return wordInfo;
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return WordInfo.defaultWordInfo();
+    }
+
+    public String getRandomWord() {
         while (true) {
             DataStore dataStore = DataStore.getInstance();
             int randomIndex = (int) (Math.random() * dataStore.words.size());
@@ -133,15 +245,15 @@ public class DataStore {
         }
     }
 
-    public static String getRandomWord(int length) {
-        List<String> words = new ArrayList<String>();
+    public String getRandomWord(int length) {
+        List<String> satisfiedWords = new ArrayList<String>();
         for (String word : words) {
             if (word.length() == length) {
-                words.add(word);
+                satisfiedWords.add(word);
             }
         }
-        int randomIndex = (int) (Math.random() * words.size());
-        String randomWord = words.get(randomIndex);
+        int randomIndex = (int) (Math.random() * satisfiedWords.size());
+        String randomWord = satisfiedWords.get(randomIndex);
         return randomWord;
     }
 
@@ -149,4 +261,12 @@ public class DataStore {
         return instance;
     }
 
+    public boolean findWord(String word) {
+        for (String w : words) {
+            if (w.equals(word)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
