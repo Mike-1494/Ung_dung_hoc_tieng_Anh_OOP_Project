@@ -17,7 +17,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="719.0" prefWidth="1370.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="App.DictionaryController">
    <children>
-      <Line endY="610.0" layoutX="1007.0" layoutY="18.0" startY="110.0" />
+      <Line endY="610.0" layoutX="1007.0" layoutY="41.0" startY="110.0" />
       <Label layoutX="27.0" layoutY="116.0" prefHeight="52.0" prefWidth="128.0" text="Search words" textAlignment="CENTER">
          <font>
             <Font size="18.0" />
@@ -28,7 +28,7 @@
             <Font size="28.0" />
          </font>
       </Label>
-      <Line endY="610.0" layoutX="349.0" layoutY="21.0" startY="110.0" />
+      <Line endY="610.0" layoutX="349.0" layoutY="39.0" startY="110.0" />
       <Button layoutX="1068.0" layoutY="149.0" mnemonicParsing="false" onAction="#switchToGameMultipleChoice" prefHeight="131.0" prefWidth="163.0" text="Multiple-choice&#10;Quizzes" textAlignment="CENTER">
          <font>
             <Font size="19.0" />
@@ -110,7 +110,7 @@
                         <TableView fx:id="wordlist" layoutX="-2.0" layoutY="1.0" prefHeight="539.0" prefWidth="657.0">
                           <columns>
                             <TableColumn fx:id="word_tg" prefWidth="158.39996337890625" text="Words" />
-                            <TableColumn fx:id="mean" prefWidth="499.1999816894531" text="Meaning in Vietnamese" />
+                            <TableColumn fx:id="mean" prefWidth="499.1999816894531" text="Meaning " />
                           </columns>
                         </TableView>
                      </children>
@@ -142,7 +142,7 @@
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
                         <TextArea fx:id="note" layoutY="-1.0" prefHeight="506.0" prefWidth="574.0" />
-                        <Button fx:id="savenote" layoutX="489.0" layoutY="462.0" mnemonicParsing="false" onAction="#saveNote" text="Save" />
+                        <Button fx:id="savenote" layoutX="489.0" layoutY="462.0" mnemonicParsing="false" onAction="#saveNoteApp" text="Save" />
                      </children>
                   </AnchorPane>
             </content>

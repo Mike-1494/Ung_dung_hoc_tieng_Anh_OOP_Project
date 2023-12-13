@@ -100,8 +100,7 @@ public class DictionaryController {
     private Button saveword;
 
     private DictionaryAPI dictionaryAPI = new DictionaryAPI();
-
-
+    private Note Note = new Note();
     private final int wordLength = 5;
     private final int numRow = 6;
 
@@ -109,6 +108,8 @@ public class DictionaryController {
     public void initialize() {
         searchbutton.setOnAction(e -> searchWord());
         saveword.setOnAction(e -> saveWord());
+        savenote.setOnAction(e -> saveNoteApp());
+        Note.loadNotesFromFile();
 
         taskList = FXCollections.observableArrayList();
         priority.setCellValueFactory(new PropertyValueFactory<Task, Integer>("priority"));
@@ -136,7 +137,7 @@ public class DictionaryController {
         todolist.setEditable(true);
         todolist.setItems(taskList);
         loadTasksFromMySQL();
-        loadNotesFromFile();
+        note.setText(Note.getNote());
         loadWordsFromMySQL();
     }
 
@@ -377,12 +378,14 @@ public class DictionaryController {
         // show grid
     }
 
-    public void switchtoNotes(ActionEvent event) throws Exception {
-        resetScene(event);
-        mainLabel.setText("Notes");
-        tab.setVisible(true);
-        if(savenote.isPressed()){
-            saveNote();
+    public void saveNoteApp() {
+        String s = note.getText();
+        File file = new File("task_descriptions.txt");
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write(s);
+            System.out.println("Note saved to file: " + file.getAbsolutePath());
+        } catch (IOException e) {
+            System.out.println("Error saving note to file: " + e.getMessage());
         }
     }
 
@@ -461,38 +464,6 @@ public class DictionaryController {
             System.out.println("Tasks loaded from MySQL successfully.");
         } catch (SQLException e) {
             System.out.println("Error loading tasks from MySQL: " + e.getMessage());
-        }
-    }
-
-    public void saveNote() {
-        String s = note.getText();
-
-        File file = new File("task_descriptions.txt");
-
-        try (FileWriter writer = new FileWriter(file)) {
-            writer.write(s);
-            System.out.println("Note saved to file: " + file.getAbsolutePath());
-        } catch (IOException e) {
-            System.out.println("Error saving note to file: " + e.getMessage());
-        }
-    }
-
-    public void loadNotesFromFile() {
-        File file = new File("task_descriptions.txt");
-
-        if (file.exists()) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                StringBuilder stringBuilder = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    stringBuilder.append(line);
-                    stringBuilder.append(System.lineSeparator());
-                }
-                note.setText(stringBuilder.toString());
-                System.out.println("Notes loaded from file: " + file.getAbsolutePath());
-            } catch (IOException e) {
-                System.out.println("Error loading notes from file: " + e.getMessage());
-            }
         }
     }
 
