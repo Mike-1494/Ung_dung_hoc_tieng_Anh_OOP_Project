@@ -1,13 +1,15 @@
 package App;
+
 import Base.*;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,7 +21,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.input.KeyEvent;
@@ -73,15 +74,15 @@ public class DictionaryController {
     @FXML
     private TableColumn<Task, Integer> priority;
     @FXML
-    private TableColumn<Task, String> taskName; 
-    @FXML 
+    private TableColumn<Task, String> taskName;
+    @FXML
     private TableColumn<Task, String> taskProgress;
     @FXML
     private TableView<Word> wordlist;
     @FXML
     private TableColumn<Word, String> word_tg;
     @FXML
-    private TableColumn<Word, String> mean; 
+    private TableColumn<Word, String> mean;
 
     private ObservableList<Task> taskList;
     private ObservableList<Word> WordList;
@@ -92,15 +93,14 @@ public class DictionaryController {
     private Button searchbutton;
     @FXML
     private Label word;
-    @FXML 
+    @FXML
     private Label phonetics;
-    @FXML 
+    @FXML
     private Label meaning;
     @FXML
     private Button saveword;
 
     private DictionaryAPI dictionaryAPI = new DictionaryAPI();
-
 
     private final int wordLength = 5;
     private final int numRow = 6;
@@ -119,7 +119,7 @@ public class DictionaryController {
             Task task = event.getTableView().getItems().get(event.getTablePosition().getRow());
             task.setTaskProgress(event.getNewValue());
             updateTasktoMySQL(task);
-        });    
+        });
 
         WordList = FXCollections.observableArrayList();
         word_tg.setCellValueFactory(new PropertyValueFactory<Word, String>("word_target"));
@@ -139,7 +139,6 @@ public class DictionaryController {
         loadNotesFromFile();
         loadWordsFromMySQL();
     }
-
 
     public void returnToMenu(ActionEvent event) throws Exception {
         resetScene(event);
@@ -166,14 +165,18 @@ public class DictionaryController {
         submitBtn.setText("Submit");
         submitBtn.setOnAction(null);
         submitBtn.setVisible(false);
-
         wordlist.getItems().clear();
+
         loadWordsFromMySQL();
         todolist.getItems().clear();
+
         loadTasksFromMySQL();
+
     }
+
     /**
      * Wordle
+     * 
      * @param event
      * @throws Exception
      */
@@ -277,8 +280,10 @@ public class DictionaryController {
 
     /**
      * Multiple choice
+     * 
      * @param answer
      */
+
     private void addAnswer(String answer) {
         StackPane stackPane = new StackPane();
         Button button = new Button();
@@ -381,7 +386,7 @@ public class DictionaryController {
         resetScene(event);
         mainLabel.setText("Notes");
         tab.setVisible(true);
-        if(savenote.isPressed()){
+        if (savenote.isPressed()) {
             saveNote();
         }
     }
@@ -392,11 +397,16 @@ public class DictionaryController {
         tab.setVisible(true);
     }
 
+    public void playAudio(ActionEvent event) throws Exception {
+        DataStore dataStore = DataStore.getInstance();
+        dataStore.wordInfo.playAudio();
+    }
+
     private void insertTaskToMySQL(Task task) {
         String url = "jdbc:mysql://localhost:3306/dictionary";
         String username = "root";
         String password = "140904";
-    
+
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             String insertQuery = "INSERT INTO Tasklist (priority, task_name, progress) VALUES (?, ?, ?)";
             try (PreparedStatement insertStmt = conn.prepareStatement(insertQuery)) {
@@ -405,18 +415,18 @@ public class DictionaryController {
                 insertStmt.setString(3, task.getTaskProgress());
                 insertStmt.executeUpdate();
             }
-    
+
             System.out.println("Task saved to MySQL successfully.");
         } catch (SQLException e) {
             System.out.println("Error saving task to MySQL: " + e.getMessage());
         }
     }
-    
+
     private void updateTasktoMySQL(Task task) {
         String url = "jdbc:mysql://localhost:3306/dictionary";
         String username = "root";
         String password = "140904";
-    
+
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             String insertQuery = "UPDATE Tasklist SET progress = ? WHERE task_name = ?";
             try (PreparedStatement insertStmt = conn.prepareStatement(insertQuery)) {
@@ -425,7 +435,7 @@ public class DictionaryController {
 
                 insertStmt.executeUpdate();
             }
-    
+
             System.out.println("Task saved to MySQL successfully.");
         } catch (SQLException e) {
             System.out.println("Error saving task to MySQL: " + e.getMessage());
@@ -447,7 +457,7 @@ public class DictionaryController {
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             String selectQuery = "SELECT priority, task_name, progress FROM Tasklist";
             try (PreparedStatement selectStmt = conn.prepareStatement(selectQuery);
-                ResultSet resultSet = selectStmt.executeQuery()) {  
+                    ResultSet resultSet = selectStmt.executeQuery()) {
                 while (resultSet.next()) {
                     int priority = resultSet.getInt("priority");
                     String taskName = resultSet.getString("task_name");
@@ -497,10 +507,12 @@ public class DictionaryController {
     }
 
     private void searchWord() {
+        DataStore dataStore = DataStore.getInstance();
         String input = searchbar.getText().trim();
         if (!input.isEmpty()) {
             Word word = dictionaryAPI.getWordDetails(input);
             if (word != null) {
+                dataStore.wordInfo = dataStore.getWordInfo(word.getWord_target());
                 this.word.setText(word.getWord_target());
                 phonetics.setText(word.getPhonetics());
                 meaning.setText(word.getWord_explain());
@@ -521,7 +533,7 @@ public class DictionaryController {
         String url = "jdbc:mysql://localhost:3306/dictionary";
         String username = "root";
         String password = "140904";
-    
+
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             String insertQuery = "INSERT IGNORE INTO Words (phonetics, word_target, word_explain) VALUES (?, ?, ?)";
             try (PreparedStatement insertStmt = conn.prepareStatement(insertQuery)) {
@@ -530,12 +542,12 @@ public class DictionaryController {
                 insertStmt.setString(3, meaning);
                 insertStmt.executeUpdate();
             }
-    
+
             System.out.println("Word saved to MySQL successfully.");
         } catch (SQLException e) {
             System.out.println("Error saving word to MySQL: " + e.getMessage());
         }
-        
+
         System.out.println("Word saved: " + word);
         System.out.println("Phonetics: " + phonetics);
         System.out.println("Meaning: " + meaning);
@@ -549,7 +561,7 @@ public class DictionaryController {
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             String selectQuery = "SELECT phonetics, word_target, word_explain FROM Words";
             try (PreparedStatement selectStmt = conn.prepareStatement(selectQuery);
-                ResultSet resultSet = selectStmt.executeQuery()) {  
+                    ResultSet resultSet = selectStmt.executeQuery()) {
                 while (resultSet.next()) {
                     String phonetics = resultSet.getString("phonetics");
                     String word_target = resultSet.getString("word_target");
@@ -571,7 +583,7 @@ public class DictionaryController {
         String url = "jdbc:mysql://localhost:3306/dictionary";
         String username = "root";
         String password = "140904";
-    
+
         try (Connection conn = DriverManager.getConnection(url, username, password)) {
             String insertQuery = "UPDATE Words SET word_explain = ? WHERE word_target = ?";
             try (PreparedStatement insertStmt = conn.prepareStatement(insertQuery)) {
@@ -580,7 +592,7 @@ public class DictionaryController {
 
                 insertStmt.executeUpdate();
             }
-    
+
             System.out.println("Word saved to MySQL successfully.");
         } catch (SQLException e) {
             System.out.println("Word saving task to MySQL: " + e.getMessage());

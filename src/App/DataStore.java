@@ -1,19 +1,22 @@
 package App;
 
+import Base.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
+import javazoom.jl.player.Player;
 
 public class DataStore {
     private static DataStore instance = new DataStore();
@@ -62,12 +65,35 @@ public class DataStore {
         public List<Meaning> meanings;
         public String word;
 
+        public void playAudio() throws Exception {
+            String url = DictionaryManagement.getPhonetics(word);
+            if (url == null) {
+                return;
+            }
+            try {
+                URLConnection urlConnection = new URL(url).openConnection();
+                urlConnection.connect();
+                Player player = new Player(urlConnection.getInputStream());
+                player.play(300);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+
         public String getExample() {
             String example = meanings.get(0).definitions.get(0).example;
             if (example == null) {
                 return "Failed to get example";
             }
             return example;
+        }
+
+        public String getDefinition() {
+            String definition = meanings.get(0).definitions.get(0).definition;
+            if (definition == null) {
+                return "Failed to get definition";
+            }
+            return definition;
         }
 
         public static WordInfo defaultWordInfo() {
@@ -88,7 +114,7 @@ public class DataStore {
         }
     }
 
-    private WordInfo getWordInfo(String word) {
+    public WordInfo getWordInfo(String word) {
         wordInfo = null;
         try {
             Runnable r = new Runnable() {

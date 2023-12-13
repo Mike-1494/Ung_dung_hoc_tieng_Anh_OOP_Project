@@ -1,4 +1,5 @@
 package Base;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
@@ -12,7 +13,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
 
 public class DictionaryManagement {
     private final Dictionary dictionary;
@@ -46,7 +46,8 @@ public class DictionaryManagement {
 
     public void insertFromDatabase() {
         try {
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root", "140904");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root",
+                    "140904");
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM words");
 
@@ -79,8 +80,10 @@ public class DictionaryManagement {
         this.dictionary.addWord(word);
 
         try {
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root", "140904");
-            PreparedStatement statement = connection.prepareStatement("INSERT INTO words (word_target, word_explain) VALUES (?, ?)");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root",
+                    "140904");
+            PreparedStatement statement = connection
+                    .prepareStatement("INSERT INTO words (word_target, word_explain) VALUES (?, ?)");
             statement.setString(1, word.getWord_target());
             statement.setString(2, word.getWord_explain());
             statement.executeUpdate();
@@ -103,7 +106,8 @@ public class DictionaryManagement {
             this.dictionary.removeWord(wordToRemove);
 
             try {
-                Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root", "140904");
+                Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root",
+                        "140904");
                 PreparedStatement statement = connection.prepareStatement("DELETE FROM words WHERE word_target = ?");
                 statement.setString(1, word_target);
                 statement.executeUpdate();
@@ -121,8 +125,10 @@ public class DictionaryManagement {
         dictionary.updateWordExplain(res, new_word_explain);
 
         try {
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root", "140904");
-            PreparedStatement statement = connection.prepareStatement("UPDATE words SET word_explain = ? WHERE word_target = ?");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/dictionary", "root",
+                    "140904");
+            PreparedStatement statement = connection
+                    .prepareStatement("UPDATE words SET word_explain = ? WHERE word_target = ?");
             statement.setString(1, new_word_explain);
             statement.setString(2, word_target);
             statement.executeUpdate();
@@ -146,7 +152,7 @@ public class DictionaryManagement {
             // Check if the current word's substring matches the target
             if (cur.length() >= len && cur.substring(0, len).equals(target)) {
                 result = mid;
-                high = mid - 1;  // Look for the first occurrence to the left
+                high = mid - 1; // Look for the first occurrence to the left
             } else if (cur.compareTo(target) < 0) {
                 low = mid + 1;
             } else {
@@ -159,13 +165,15 @@ public class DictionaryManagement {
 
     /**
      * search word in dictionary.
+     * 
      * @param target target to search
      * @return list of word
      */
     public ArrayList<Word> dictionarySearcher(String target) {
         ArrayList<Word> res = new ArrayList<Word>();
         int start = binarySearchFirstEqual(dictionary.getWordList(), target);
-        if (start == -1) return res;
+        if (start == -1)
+            return res;
 
         while (start < dictionary.getWordList().size() &&
                 dictionary.getWordList().get(start).getWord_target().startsWith(target)) {
@@ -175,8 +183,7 @@ public class DictionaryManagement {
         return res;
     }
 
-
-    private String parse(String responseBody) {
+    private static String parse(String responseBody) {
         JSONParser parser = new JSONParser();
         try {
             JSONArray jsonArray = (JSONArray) parser.parse(responseBody);
@@ -189,8 +196,8 @@ public class DictionaryManagement {
             return null;
         }
     }
-    
-    public String getPhonetics(String word) {
+
+    public static String getPhonetics(String word) {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.dictionaryapi.dev/api/v2/entries/en/" + word))
@@ -199,7 +206,6 @@ public class DictionaryManagement {
         String responseBody = client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
                 .join();
-
         return parse(responseBody);
     }
 }
