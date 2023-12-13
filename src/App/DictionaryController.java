@@ -146,6 +146,10 @@ public class DictionaryController {
         resetScene(event);
         tab.setVisible(true);
         mainLabel.setText("How are you today?\nLet's start learning!");
+        wordlist.getItems().clear();
+        loadWordsFromMySQL();
+        todolist.getItems().clear();
+        loadTasksFromMySQL();
     }
 
     public void resetScene(ActionEvent event) throws Exception {
@@ -167,11 +171,6 @@ public class DictionaryController {
         submitBtn.setText("Submit");
         submitBtn.setOnAction(null);
         submitBtn.setVisible(false);
-
-        wordlist.getItems().clear();
-        loadWordsFromMySQL();
-        todolist.getItems().clear();
-        loadTasksFromMySQL();
     }
     /**
      * Wordle
@@ -321,6 +320,7 @@ public class DictionaryController {
     public void switchToGameMultipleChoice(ActionEvent event) throws Exception {
         DataStore dataStore = DataStore.getInstance();
         resetScene(event);
+        tab.setVisible(false);
         mainLabel.setText("Multiple Choice");
         dataStore.wordInfo = dataStore.getWordInfo();
         dataStore.answer = dataStore.wordInfo.word;
@@ -331,6 +331,7 @@ public class DictionaryController {
         dataStore.answer = dataStore.answer.replaceAll("[^a-zA-Z0-9]", "");
 
         questionLabel.setText(example.replaceFirst(dataStore.answer, "______"));
+        questionLabel.setWrapText(true);
         questionLabel.setVisible(true);
         String[] answers = { dataStore.getRandomWord(),
                 dataStore.answer,
